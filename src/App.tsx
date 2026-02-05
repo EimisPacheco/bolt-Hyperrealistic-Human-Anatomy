@@ -7,7 +7,7 @@ import OrganDetail from './components/ui/OrganDetail';
 function App() {
   return (
     <AnatomyProvider>
-      <div className="w-screen h-screen overflow-hidden bg-[#0A0F1A] relative">
+      <div className="w-screen h-screen overflow-hidden bg-[#1A1F2A] relative">
         <div className="absolute inset-0 z-0">
           <AnatomyScene />
         </div>

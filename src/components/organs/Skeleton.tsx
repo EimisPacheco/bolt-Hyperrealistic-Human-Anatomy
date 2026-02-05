@@ -24,13 +24,15 @@ export default function Skeleton() {
   const material = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#E8DCC8',
-        emissive: '#2A2820',
-        emissiveIntensity: 0.1,
-        roughness: 0.6,
-        metalness: 0.05,
+        color: '#D8CEB8',
+        emissive: '#1A1810',
+        emissiveIntensity: 0.05,
+        roughness: 0.55,
+        metalness: 0,
         transparent: true,
         opacity: 0.25,
+        clearcoat: 0.1,
+        clearcoatRoughness: 0.4,
       }),
     []
   );

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { fbm } from './noise';
 
 export function createBrainGeometry(): THREE.BufferGeometry {
-  const geo = new THREE.SphereGeometry(0.32, 64, 48);
+  const geo = new THREE.SphereGeometry(0.32, 128, 96);
   const pos = geo.attributes.position;
   const normal = geo.attributes.normal;
 
@@ -15,12 +15,17 @@ export function createBrainGeometry(): THREE.BufferGeometry {
     const ny = normal.getY(i);
     const nz = normal.getZ(i);
 
-    const wrinkle = fbm(x * 8, y * 8, z * 8, 5, 2.2, 0.55) * 0.025;
-    const largeWrinkle = fbm(x * 3, y * 3, z * 3, 3, 2.0, 0.5) * 0.015;
-    const fissure = Math.abs(x) < 0.015 ? -0.02 : 0;
-    const flattenBottom = y < -0.15 ? (y + 0.15) * 0.3 : 0;
+    const fineWrinkle = fbm(x * 18, y * 18, z * 18, 6, 2.3, 0.5) * 0.012;
+    const mediumWrinkle = fbm(x * 10, y * 10, z * 10, 5, 2.2, 0.55) * 0.018;
+    const largeWrinkle = fbm(x * 4, y * 4, z * 4, 4, 2.0, 0.5) * 0.022;
 
-    const displacement = wrinkle + largeWrinkle + fissure + flattenBottom;
+    const longitudinalFissure = Math.abs(x) < 0.025 ? -0.035 * (1 - Math.abs(x) / 0.025) : 0;
+    const lateralSulcus = Math.abs(y - 0.05) < 0.03 && Math.abs(x) > 0.1 ? -0.02 : 0;
+
+    const flattenBottom = y < -0.15 ? (y + 0.15) * 0.35 : 0;
+    const roundBack = z < -0.1 ? (z + 0.1) * 0.2 : 0;
+
+    const displacement = fineWrinkle + mediumWrinkle + largeWrinkle + longitudinalFissure + lateralSulcus + flattenBottom + roundBack;
 
     pos.setXYZ(i, x + nx * displacement, y * 0.85 + ny * displacement, z + nz * displacement);
   }
@@ -30,37 +35,47 @@ export function createBrainGeometry(): THREE.BufferGeometry {
 }
 
 export function createHeartGeometry(): THREE.BufferGeometry {
-  const shape = new THREE.Shape();
-
-  shape.moveTo(0, 0);
-  shape.bezierCurveTo(0, -0.06, -0.12, -0.18, -0.18, -0.18);
-  shape.bezierCurveTo(-0.3, -0.18, -0.3, -0.03, -0.3, -0.03);
-  shape.bezierCurveTo(-0.3, 0.06, -0.18, 0.18, 0, 0.27);
-  shape.bezierCurveTo(0.18, 0.18, 0.3, 0.06, 0.3, -0.03);
-  shape.bezierCurveTo(0.3, -0.03, 0.3, -0.18, 0.18, -0.18);
-  shape.bezierCurveTo(0.12, -0.18, 0, -0.06, 0, 0);
-
-  const extrudeSettings: THREE.ExtrudeGeometryOptions = {
-    depth: 0.2,
-    bevelEnabled: true,
-    bevelSegments: 12,
-    steps: 4,
-    bevelSize: 0.06,
-    bevelThickness: 0.06,
-  };
-
-  const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-  geo.center();
-  geo.rotateX(Math.PI);
-  geo.scale(0.8, 0.8, 0.9);
-
+  const geo = new THREE.SphereGeometry(0.16, 96, 72);
   const pos = geo.attributes.position;
+
   for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const y = pos.getY(i);
-    const z = pos.getZ(i);
-    const bump = fbm(x * 12, y * 12, z * 12, 3, 2, 0.4) * 0.008;
-    pos.setXYZ(i, x + bump, y + bump, z + bump);
+    let x = pos.getX(i);
+    let y = pos.getY(i);
+    let z = pos.getZ(i);
+
+    const phi = Math.atan2(z, x);
+    const theta = Math.acos(y / Math.sqrt(x * x + y * y + z * z));
+
+    x *= 0.9;
+    y = y * 1.1 - 0.02;
+    z *= 1.05;
+
+    if (y > 0.05) {
+      const splitFactor = Math.abs(x) * 3;
+      y += splitFactor * splitFactor * 0.15;
+      if (x > 0) x += 0.03; else x -= 0.03;
+    }
+
+    if (y < -0.08) {
+      const taper = 1 - ((-y - 0.08) / 0.12) * 0.4;
+      x *= taper;
+      z *= taper;
+    }
+
+    const auricleRight = Math.exp(-Math.pow((x - 0.12) / 0.05, 2) - Math.pow((y - 0.08) / 0.06, 2)) * 0.04;
+    const auricleLeft = Math.exp(-Math.pow((x + 0.12) / 0.05, 2) - Math.pow((y - 0.08) / 0.06, 2)) * 0.04;
+    y += auricleRight + auricleLeft;
+
+    const muscleDetail = fbm(x * 15, y * 15, z * 15, 6, 2.1, 0.45) * 0.006;
+    const veins = Math.abs(fbm(x * 8 + 100, y * 8, z * 8, 3, 2, 0.5)) < 0.15 ? 0.003 : 0;
+    const coronaryArteries = Math.abs(fbm(phi * 5, theta * 5, 0, 2, 2, 0.5)) < 0.2 ? 0.004 : 0;
+
+    const totalDisp = muscleDetail + veins + coronaryArteries;
+    const nx = x / Math.sqrt(x * x + y * y + z * z);
+    const ny = y / Math.sqrt(x * x + y * y + z * z);
+    const nz = z / Math.sqrt(x * x + y * y + z * z);
+
+    pos.setXYZ(i, x + nx * totalDisp, y + ny * totalDisp, z + nz * totalDisp);
   }
 
   geo.computeVertexNormals();
@@ -68,7 +83,7 @@ export function createHeartGeometry(): THREE.BufferGeometry {
 }
 
 export function createLungGeometry(isLeft: boolean): THREE.BufferGeometry {
-  const geo = new THREE.SphereGeometry(0.28, 48, 36);
+  const geo = new THREE.SphereGeometry(0.28, 80, 60);
   const pos = geo.attributes.position;
   const normal = geo.attributes.normal;
 
@@ -88,9 +103,15 @@ export function createLungGeometry(isLeft: boolean): THREE.BufferGeometry {
     const cardiacNotch = medialSide && y > -0.05 && y < 0.15 ? -0.06 : 0;
     const taperedTop = y > 0.2 ? -(y - 0.2) * 0.15 : 0;
     const roundedBottom = y < -0.25 ? (y + 0.25) * 0.1 : 0;
-    const surfaceDetail = fbm(x * 10, y * 10, z * 10, 4, 2, 0.5) * 0.008;
 
-    const disp = cardiacNotch + taperedTop + roundedBottom + surfaceDetail;
+    const lobeFissures = isLeft
+      ? Math.abs(y + 0.05) < 0.015 ? -0.015 : 0
+      : (Math.abs(y + 0.05) < 0.015 || Math.abs(y - 0.1) < 0.015 ? -0.015 : 0);
+
+    const fineTexture = fbm(x * 25, y * 25, z * 25, 6, 2.2, 0.5) * 0.004;
+    const bronchialPattern = fbm(x * 15, y * 15, z * 15, 5, 2.1, 0.5) * 0.006;
+
+    const disp = cardiacNotch + taperedTop + roundedBottom + lobeFissures + fineTexture + bronchialPattern;
 
     pos.setXYZ(i, x + nx * disp, y + ny * disp, z + nz * disp);
   }
@@ -100,13 +121,18 @@ export function createLungGeometry(isLeft: boolean): THREE.BufferGeometry {
 }
 
 export function createLiverGeometry(): THREE.BufferGeometry {
-  const geo = new THREE.SphereGeometry(0.35, 48, 32);
+  const geo = new THREE.SphereGeometry(0.35, 80, 48);
   const pos = geo.attributes.position;
+  const normal = geo.attributes.normal;
 
   for (let i = 0; i < pos.count; i++) {
     let x = pos.getX(i);
     let y = pos.getY(i);
     let z = pos.getZ(i);
+
+    const nx = normal.getX(i);
+    const ny = normal.getY(i);
+    const nz = normal.getZ(i);
 
     y *= 0.4;
     x *= 1.2;
@@ -119,8 +145,16 @@ export function createLiverGeometry(): THREE.BufferGeometry {
 
     if (y > 0) y *= 0.7;
 
-    const detail = fbm(x * 8, y * 12, z * 8, 3, 2, 0.4) * 0.008;
-    pos.setXYZ(i, x + detail, y + detail, z + detail);
+    const gallbladderIndent = Math.exp(-Math.pow((x - 0.15) / 0.08, 2) - Math.pow((y + 0.05) / 0.06, 2) - Math.pow(z / 0.08, 2)) * -0.025;
+
+    const ligamentGroove = Math.abs(x) < 0.02 && z > 0.05 ? -0.015 : 0;
+
+    const surfaceTexture = fbm(x * 18, y * 18, z * 18, 5, 2.1, 0.5) * 0.005;
+    const lobulation = fbm(x * 10, y * 10, z * 10, 4, 2, 0.5) * 0.008;
+
+    const disp = gallbladderIndent + ligamentGroove + surfaceTexture + lobulation;
+
+    pos.setXYZ(i, x + nx * disp, y + ny * disp, z + nz * disp);
   }
 
   geo.computeVertexNormals();
@@ -166,24 +200,32 @@ export function createStomachGeometry(): THREE.BufferGeometry {
 }
 
 export function createKidneyGeometry(): THREE.BufferGeometry {
-  const geo = new THREE.SphereGeometry(0.12, 32, 24);
+  const geo = new THREE.SphereGeometry(0.12, 64, 48);
   const pos = geo.attributes.position;
+  const normal = geo.attributes.normal;
 
   for (let i = 0; i < pos.count; i++) {
     let x = pos.getX(i);
     let y = pos.getY(i);
     const z = pos.getZ(i);
 
+    const nx = normal.getX(i);
+    const ny = normal.getY(i);
+    const nz = normal.getZ(i);
+
     y *= 1.5;
     x *= 0.7;
 
     if (x > 0) {
-      const indent = Math.exp(-y * y * 8) * 0.04;
-      x -= indent;
+      const hilusDepth = Math.exp(-Math.pow(y / 0.15, 2) - Math.pow((x - 0.06) / 0.04, 2)) * 0.045;
+      x -= hilusDepth;
     }
 
-    const detail = fbm(x * 15, y * 15, z * 15, 3, 2, 0.4) * 0.004;
-    pos.setXYZ(i, x + detail, y + detail, z + detail);
+    const capsuleTexture = fbm(x * 22, y * 22, z * 22, 5, 2.2, 0.5) * 0.003;
+    const surfaceDetail = fbm(x * 12, y * 12, z * 12, 4, 2, 0.5) * 0.005;
+
+    const disp = capsuleTexture + surfaceDetail;
+    pos.setXYZ(i, x + nx * disp, y + ny * disp, z + nz * disp);
   }
 
   geo.computeVertexNormals();

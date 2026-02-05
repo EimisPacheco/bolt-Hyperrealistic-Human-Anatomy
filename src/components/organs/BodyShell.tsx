@@ -66,15 +66,18 @@ export default function BodyShell() {
   const material = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#C4A882',
-        emissive: '#1A1410',
-        emissiveIntensity: 0.05,
-        roughness: 0.7,
+        color: '#D4B8A0',
+        emissive: '#2A1810',
+        emissiveIntensity: 0.03,
+        roughness: 0.65,
         metalness: 0,
         transparent: true,
         opacity: 0.08,
         side: THREE.DoubleSide,
         depthWrite: false,
+        transmission: 0.05,
+        thickness: 0.8,
+        ior: 1.4,
       }),
     []
   );

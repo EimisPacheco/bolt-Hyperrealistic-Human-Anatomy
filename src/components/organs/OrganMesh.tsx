@@ -24,14 +24,20 @@ export default function OrganMesh({ data, geometry, animate }: OrganMeshProps) {
     return new THREE.MeshPhysicalMaterial({
       color: new THREE.Color(data.color),
       emissive: new THREE.Color(data.emissiveColor),
-      emissiveIntensity: 0.15,
-      roughness: 0.35,
-      metalness: 0.05,
-      clearcoat: 0.4,
-      clearcoatRoughness: 0.2,
+      emissiveIntensity: 0.08,
+      roughness: 0.6,
+      metalness: 0,
+      clearcoat: 0.15,
+      clearcoatRoughness: 0.3,
       transparent: true,
       opacity: 1,
       side: THREE.DoubleSide,
+      transmission: 0.02,
+      thickness: 0.5,
+      ior: 1.4,
+      sheen: 0.3,
+      sheenRoughness: 0.8,
+      sheenColor: new THREE.Color(data.color).multiplyScalar(0.3),
     });
   }, [data.color, data.emissiveColor]);
 

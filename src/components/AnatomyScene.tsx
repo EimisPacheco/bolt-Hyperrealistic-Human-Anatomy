@@ -12,20 +12,32 @@ import { useAnatomy } from '../context/AnatomyContext';
 function SceneLighting() {
   return (
     <>
-      <ambientLight intensity={0.4} color="#F0F0F0" />
-      <directionalLight position={[3, 5, 4]} intensity={2.5} color="#FFFFFF" castShadow />
-      <directionalLight position={[-2, 3, -3]} intensity={0.8} color="#FFFFFF" />
-      <pointLight position={[0, 2, 3]} intensity={1.2} color="#FFFBF5" distance={8} />
-      <pointLight position={[0, -1, -2]} intensity={0.6} color="#F8F8FF" distance={6} />
+      <ambientLight intensity={0.6} color="#F5F5F0" />
+      <directionalLight position={[5, 8, 6]} intensity={3.5} color="#FFFEF8" castShadow />
+      <directionalLight position={[-4, 5, -4]} intensity={1.5} color="#FFF8F0" />
+      <directionalLight position={[0, -2, 5]} intensity={0.8} color="#FFE8D8" />
+      <pointLight position={[3, 3, 4]} intensity={2.0} color="#FFFBF5" distance={10} decay={2} />
+      <pointLight position={[-3, 2, 3]} intensity={1.5} color="#FFF5EB" distance={10} decay={2} />
+      <pointLight position={[0, -1, -3]} intensity={1.0} color="#FFE8DC" distance={8} decay={2} />
       <spotLight
-        position={[0, 6, 0]}
-        angle={0.4}
-        penumbra={0.8}
-        intensity={0.8}
+        position={[0, 8, 0]}
+        angle={0.5}
+        penumbra={0.9}
+        intensity={1.5}
         color="#FFFFFF"
-        distance={12}
+        distance={15}
+        decay={2}
       />
-      <hemisphereLight args={['#FFFFFF', '#808080', 0.3]} />
+      <spotLight
+        position={[4, 4, 4]}
+        angle={0.3}
+        penumbra={0.8}
+        intensity={1.2}
+        color="#FFF8F0"
+        distance={12}
+        decay={2}
+      />
+      <hemisphereLight args={['#FFFEF8', '#40302A', 0.5]} />
     </>
   );
 }
@@ -34,20 +46,21 @@ function Effects() {
   return (
     <EffectComposer multisampling={8}>
       <Bloom
-        intensity={0.12}
-        luminanceThreshold={0.95}
-        luminanceSmoothing={0.9}
+        intensity={0.25}
+        luminanceThreshold={0.85}
+        luminanceSmoothing={0.95}
         mipmapBlur
+        radius={0.8}
       />
       <SSAO
-        radius={0.08}
-        intensity={25}
-        luminanceInfluence={0.6}
-        worldDistanceThreshold={0.5}
-        worldDistanceFalloff={0.1}
-        worldProximityThreshold={0.3}
-        worldProximityFalloff={0.1}
-        color={new THREE.Color('#000000')}
+        radius={0.15}
+        intensity={35}
+        luminanceInfluence={0.7}
+        worldDistanceThreshold={0.8}
+        worldDistanceFalloff={0.15}
+        worldProximityThreshold={0.4}
+        worldProximityFalloff={0.15}
+        color={new THREE.Color('#1A0808')}
       />
     </EffectComposer>
   );
@@ -71,8 +84,10 @@ export default function AnatomyScene() {
       gl={{
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.3,
+        toneMappingExposure: 1.1,
+        outputColorSpace: THREE.SRGBColorSpace,
       }}
+      shadows
       onPointerMissed={() => setSelectedOrgan(null)}
       style={{ background: 'transparent' }}
     >

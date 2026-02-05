@@ -1,8 +1,9 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useAnatomy } from '../../context/AnatomyContext';
 import type { OrganData } from '../../types';
+import { createOrganTexture, createNormalMap, createRoughnessMap } from '../../lib/materialUtils';
 
 interface OrganMeshProps {
   data: OrganData;
@@ -20,26 +21,52 @@ export default function OrganMesh({ data, geometry, animate }: OrganMeshProps) {
   const isVisible = visibleSystems.includes(data.system);
   const isOtherSelected = selectedOrgan !== null && !isSelected;
 
+  const textures = useMemo(() => {
+    const colorTexture = createOrganTexture(data.color, 1024, 1024);
+    const normalMap = createNormalMap(1024, 1024);
+    const roughnessMap = createRoughnessMap(0.4, 512, 512);
+
+    return { colorTexture, normalMap, roughnessMap };
+  }, [data.color]);
+
   const material = useMemo(() => {
+    const baseColor = new THREE.Color(data.color);
+
     return new THREE.MeshPhysicalMaterial({
-      color: new THREE.Color(data.color),
-      emissive: new THREE.Color(data.emissiveColor),
-      emissiveIntensity: 0.08,
-      roughness: 0.6,
+      map: textures.colorTexture,
+      normalMap: textures.normalMap,
+      normalScale: new THREE.Vector2(0.3, 0.3),
+      roughnessMap: textures.roughnessMap,
+      roughness: 0.4,
       metalness: 0,
-      clearcoat: 0.15,
-      clearcoatRoughness: 0.3,
+      clearcoat: 0.5,
+      clearcoatRoughness: 0.15,
       transparent: true,
       opacity: 1,
       side: THREE.DoubleSide,
-      transmission: 0.02,
-      thickness: 0.5,
+      transmission: 0.15,
+      thickness: 1.5,
       ior: 1.4,
-      sheen: 0.3,
-      sheenRoughness: 0.8,
-      sheenColor: new THREE.Color(data.color).multiplyScalar(0.3),
+      sheen: 0.6,
+      sheenRoughness: 0.6,
+      sheenColor: baseColor.clone().multiplyScalar(0.4),
+      attenuationColor: baseColor.clone().multiplyScalar(0.85),
+      attenuationDistance: 0.5,
+      specularIntensity: 0.5,
+      specularColor: new THREE.Color(0xFFFFFF),
+      emissive: new THREE.Color(data.emissiveColor),
+      emissiveIntensity: 0.12,
     });
-  }, [data.color, data.emissiveColor]);
+  }, [data.color, data.emissiveColor, textures]);
+
+  useEffect(() => {
+    return () => {
+      textures.colorTexture.dispose();
+      textures.normalMap.dispose();
+      textures.roughnessMap.dispose();
+      material.dispose();
+    };
+  }, [textures, material]);
 
   useFrame((state) => {
     if (!meshRef.current) return;

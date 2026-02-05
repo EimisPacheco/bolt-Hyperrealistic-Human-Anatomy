@@ -22,36 +22,15 @@ export default function Skeleton() {
   }, []);
 
   const material = useMemo(
-    () => {
-      try {
-        return new THREE.MeshPhysicalMaterial({
-          color: '#E8DCC8',
-          emissive: '#2A2418',
-          emissiveIntensity: 0.08,
-          roughness: 0.35,
-          metalness: 0,
-          transparent: true,
-          opacity: 0.25,
-          clearcoat: 0.25,
-          clearcoatRoughness: 0.3,
-          transmission: 0.1,
-          thickness: 0.8,
-          ior: 1.55,
-          sheen: 0.2,
-          sheenRoughness: 0.8,
-          sheenColor: new THREE.Color('#F8F0E0'),
-          specularIntensity: 0.4,
-          specularColor: new THREE.Color(0xFFFFFF),
-        });
-      } catch (e) {
-        console.error('Error creating skeleton material:', e);
-        return new THREE.MeshStandardMaterial({
-          color: '#E8DCC8',
-          transparent: true,
-          opacity: 0.25,
-        });
-      }
-    },
+    () => new THREE.MeshStandardMaterial({
+      color: '#E8DCC8',
+      emissive: '#2A2418',
+      emissiveIntensity: 0.08,
+      roughness: 0.35,
+      metalness: 0,
+      transparent: true,
+      opacity: 0.25,
+    }),
     []
   );
 

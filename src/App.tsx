@@ -1,5 +1,6 @@
 import { AnatomyProvider } from './context/AnatomyContext';
 import AnatomyScene from './components/AnatomyScene';
+import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/ui/Header';
 import Sidebar from './components/ui/Sidebar';
 import OrganDetail from './components/ui/OrganDetail';
@@ -9,7 +10,9 @@ function App() {
     <AnatomyProvider>
       <div className="w-screen h-screen overflow-hidden bg-[#1A1F2A] relative">
         <div className="absolute inset-0 z-0">
-          <AnatomyScene />
+          <ErrorBoundary>
+            <AnatomyScene />
+          </ErrorBoundary>
         </div>
         <Header />
         <Sidebar />

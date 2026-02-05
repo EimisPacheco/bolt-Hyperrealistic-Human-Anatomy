@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows } from '@react-three/drei';
-import { EffectComposer, Bloom, SSAO } from '@react-three/postprocessing';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import AllOrgans from './organs/AllOrgans';
 import Skeleton from './organs/Skeleton';
@@ -46,21 +46,11 @@ function Effects() {
   return (
     <EffectComposer multisampling={8}>
       <Bloom
-        intensity={0.25}
-        luminanceThreshold={0.85}
+        intensity={0.3}
+        luminanceThreshold={0.8}
         luminanceSmoothing={0.95}
         mipmapBlur
-        radius={0.8}
-      />
-      <SSAO
-        radius={0.15}
-        intensity={35}
-        luminanceInfluence={0.7}
-        worldDistanceThreshold={0.8}
-        worldDistanceFalloff={0.15}
-        worldProximityThreshold={0.4}
-        worldProximityFalloff={0.15}
-        color={new THREE.Color('#1A0808')}
+        radius={1.2}
       />
     </EffectComposer>
   );

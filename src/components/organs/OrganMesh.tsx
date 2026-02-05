@@ -22,41 +22,61 @@ export default function OrganMesh({ data, geometry, animate }: OrganMeshProps) {
   const isOtherSelected = selectedOrgan !== null && !isSelected;
 
   const textures = useMemo(() => {
-    const colorTexture = createOrganTexture(data.color, 1024, 1024);
-    const normalMap = createNormalMap(1024, 1024);
-    const roughnessMap = createRoughnessMap(0.4, 512, 512);
+    try {
+      const colorTexture = createOrganTexture(data.color, 1024, 1024);
+      const normalMap = createNormalMap(1024, 1024);
+      const roughnessMap = createRoughnessMap(0.4, 512, 512);
 
-    return { colorTexture, normalMap, roughnessMap };
+      return { colorTexture, normalMap, roughnessMap };
+    } catch (e) {
+      console.error('Error creating organ textures:', e);
+      return {
+        colorTexture: new THREE.Texture(),
+        normalMap: new THREE.Texture(),
+        roughnessMap: new THREE.Texture(),
+      };
+    }
   }, [data.color]);
 
   const material = useMemo(() => {
-    const baseColor = new THREE.Color(data.color);
+    try {
+      const baseColor = new THREE.Color(data.color);
 
-    return new THREE.MeshPhysicalMaterial({
-      map: textures.colorTexture,
-      normalMap: textures.normalMap,
-      normalScale: new THREE.Vector2(0.3, 0.3),
-      roughnessMap: textures.roughnessMap,
-      roughness: 0.4,
-      metalness: 0,
-      clearcoat: 0.5,
-      clearcoatRoughness: 0.15,
-      transparent: true,
-      opacity: 1,
-      side: THREE.DoubleSide,
-      transmission: 0.15,
-      thickness: 1.5,
-      ior: 1.4,
-      sheen: 0.6,
-      sheenRoughness: 0.6,
-      sheenColor: baseColor.clone().multiplyScalar(0.4),
-      attenuationColor: baseColor.clone().multiplyScalar(0.85),
-      attenuationDistance: 0.5,
-      specularIntensity: 0.5,
-      specularColor: new THREE.Color(0xFFFFFF),
-      emissive: new THREE.Color(data.emissiveColor),
-      emissiveIntensity: 0.12,
-    });
+      return new THREE.MeshPhysicalMaterial({
+        color: baseColor,
+        map: textures.colorTexture,
+        normalMap: textures.normalMap,
+        normalScale: new THREE.Vector2(0.3, 0.3),
+        roughnessMap: textures.roughnessMap,
+        roughness: 0.4,
+        metalness: 0,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.15,
+        transparent: true,
+        opacity: 1,
+        side: THREE.DoubleSide,
+        transmission: 0.15,
+        thickness: 1.5,
+        ior: 1.4,
+        sheen: 0.6,
+        sheenRoughness: 0.6,
+        sheenColor: baseColor.clone().multiplyScalar(0.4),
+        attenuationColor: baseColor.clone().multiplyScalar(0.85),
+        attenuationDistance: 0.5,
+        specularIntensity: 0.5,
+        specularColor: new THREE.Color(0xFFFFFF),
+        emissive: new THREE.Color(data.emissiveColor),
+        emissiveIntensity: 0.12,
+      });
+    } catch (e) {
+      console.error('Error creating organ material:', e);
+      return new THREE.MeshStandardMaterial({
+        color: new THREE.Color(data.color),
+        transparent: true,
+        opacity: 1,
+        side: THREE.DoubleSide,
+      });
+    }
   }, [data.color, data.emissiveColor, textures]);
 
   useEffect(() => {

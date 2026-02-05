@@ -64,30 +64,41 @@ export default function BodyShell() {
   const headGeo = useMemo(() => createHeadGeometry(), []);
 
   const material = useMemo(
-    () =>
-      new THREE.MeshPhysicalMaterial({
-        color: '#E8D4C0',
-        emissive: '#3A2820',
-        emissiveIntensity: 0.05,
-        roughness: 0.45,
-        metalness: 0,
-        transparent: true,
-        opacity: 0.08,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-        transmission: 0.25,
-        thickness: 2.0,
-        ior: 1.38,
-        clearcoat: 0.3,
-        clearcoatRoughness: 0.4,
-        sheen: 0.4,
-        sheenRoughness: 0.7,
-        sheenColor: new THREE.Color('#FFE0C8'),
-        attenuationColor: new THREE.Color('#FFD5B0'),
-        attenuationDistance: 1.0,
-        specularIntensity: 0.3,
-        specularColor: new THREE.Color(0xFFFFFF),
-      }),
+    () => {
+      try {
+        return new THREE.MeshPhysicalMaterial({
+          color: '#E8D4C0',
+          emissive: '#3A2820',
+          emissiveIntensity: 0.05,
+          roughness: 0.45,
+          metalness: 0,
+          transparent: true,
+          opacity: 0.08,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+          transmission: 0.25,
+          thickness: 2.0,
+          ior: 1.38,
+          clearcoat: 0.3,
+          clearcoatRoughness: 0.4,
+          sheen: 0.4,
+          sheenRoughness: 0.7,
+          sheenColor: new THREE.Color('#FFE0C8'),
+          attenuationColor: new THREE.Color('#FFD5B0'),
+          attenuationDistance: 1.0,
+          specularIntensity: 0.3,
+          specularColor: new THREE.Color(0xFFFFFF),
+        });
+      } catch (e) {
+        console.error('Error creating body shell material:', e);
+        return new THREE.MeshStandardMaterial({
+          color: '#E8D4C0',
+          transparent: true,
+          opacity: 0.08,
+          side: THREE.DoubleSide,
+        });
+      }
+    },
     []
   );
 

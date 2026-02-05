@@ -6,14 +6,17 @@ export function createOrganTexture(
   width = 512,
   height = 512
 ): THREE.Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
 
-  if (!ctx) {
-    return new THREE.Texture();
-  }
+    if (!ctx) {
+      const fallbackTexture = new THREE.Texture();
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
+    }
 
   const imageData = ctx.createImageData(width, height);
   const data = imageData.data;
@@ -44,25 +47,33 @@ export function createOrganTexture(
     }
   }
 
-  ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.needsUpdate = true;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
 
-  return texture;
+    return texture;
+  } catch (e) {
+    const fallbackTexture = new THREE.Texture();
+    fallbackTexture.needsUpdate = true;
+    return fallbackTexture;
+  }
 }
 
 export function createNormalMap(width = 512, height = 512): THREE.Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
 
-  if (!ctx) {
-    return new THREE.Texture();
-  }
+    if (!ctx) {
+      const fallbackTexture = new THREE.Texture();
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
+    }
 
   const imageData = ctx.createImageData(width, height);
   const data = imageData.data;
@@ -103,14 +114,19 @@ export function createNormalMap(width = 512, height = 512): THREE.Texture {
     }
   }
 
-  ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.needsUpdate = true;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
 
-  return texture;
+    return texture;
+  } catch (e) {
+    const fallbackTexture = new THREE.Texture();
+    fallbackTexture.needsUpdate = true;
+    return fallbackTexture;
+  }
 }
 
 export function createRoughnessMap(
@@ -118,14 +134,17 @@ export function createRoughnessMap(
   width = 512,
   height = 512
 ): THREE.Texture {
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
 
-  if (!ctx) {
-    return new THREE.Texture();
-  }
+    if (!ctx) {
+      const fallbackTexture = new THREE.Texture();
+      fallbackTexture.needsUpdate = true;
+      return fallbackTexture;
+    }
 
   const imageData = ctx.createImageData(width, height);
   const data = imageData.data;
@@ -147,12 +166,17 @@ export function createRoughnessMap(
     }
   }
 
-  ctx.putImageData(imageData, 0, 0);
+    ctx.putImageData(imageData, 0, 0);
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.needsUpdate = true;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.needsUpdate = true;
 
-  return texture;
+    return texture;
+  } catch (e) {
+    const fallbackTexture = new THREE.Texture();
+    fallbackTexture.needsUpdate = true;
+    return fallbackTexture;
+  }
 }
